@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&family=Suez+One&display=swap');
+
+:root {
+  --background-color: #FFFFFF;
+  --text-color: #2A2C2D;
+  --background-color-output: #F1F1F1;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background-color);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+main {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 60px;
+}
+
+h1, h2, button {
+  font-family: 'Suez One', sans-serif;
+  color: var(--text-color);
+  font-weight: 400;
+}
+
+textarea {
+  font-family: 'Roboto Slab', sans-serif;
+  font-size: 16px;
+  text-align: left;
+  resize: none;
+  padding: 8px;
+  color: var(--text-color)
+}
+textarea.input {
+  background: var(--background-color);
+}
+
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
+#logo {
+  width: 200px;
+}
+
+div.tema {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 50px;
+}
+
+div.tema h2 {
+  font-size: 16px;
+}
+
+.switch {
+  position: absolute;
+  margin-left: -9999px;
+  visibility: hidden;
+}
+
+.switch + label {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.switch--shadow + label {
+  padding: 2px;
+  width: 50px;
+  height: 25px;
+  background-color: #dddddd;
+  border-radius: 25px;
+}
+
+.switch--shadow + label:before,
+.switch--shadow + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: '';
+}
+.switch--shadow + label:before {
+  right: 1px;
+  background-color: #f1f1f1;
+  border-radius: 25px;
+  transition: all 0.4s;
+}
+.switch--shadow + label:after {
+  width: 25px;
+  background-color: #fff;
+  border-radius: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s;
+}
+
+.switch--shadow:checked + label:before {
+  background-color: #8ce196;
+}
+.switch--shadow:checked + label:after {
+  transform: translateX(25px);
+}
+
+div.dados {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+div.dados textarea {
+  width: 575px;
+  height: 500px;
+}
+
+div.dados textarea#output {
+  background-color: var(--background-color-output);
+}
+
+div.key {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 50px 0px;
+}
+
+div.key div.chave h1 {
+  text-align: center;
+}
+
+div.key div.chave textarea {
+  width: 280px;
+}
+
+div.key div.botoes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+div.key div.botoes button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0b400;
+  color: #FFF;
+  margin-bottom: 30px;
+  font-size: 20px;
+  height: 48px;
+  width: 75%;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 2px 4px #999;
+}
+
+div.key div.botoes button:hover { background: #dfa700 }
+div.key div.botoes button:active { transform: translate(2px, 4px); box-shadow: none;}
+
+div.key div.botoes button img.icon {
+  margin-right: 10px;
+}
