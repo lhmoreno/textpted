@@ -1,16 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import fechado from './assets/fechado.svg'
 import aberto from './assets/aberto.svg'
 import light from './assets/light-logo.svg'
 import dark from './assets/dark-logo.svg'
 
+import { Switch, FormGroup, FormControlLabel } from '@material-ui/core'
+import { Alert } from '@material-ui/lab'
+
+import Configs from './config/configs' // Configurações de idioma e tema
+
+import Cipher from './algorithms/VigenereCipher'
+const { criptografar, desencriptografar } = new Cipher()
+
 function App() {
-  const [linhas, setLinhas] = useState('1')
+
+  const [linhas, setLinhas] = useState('1') // Criar input de chave que aumenta conforme o numero de linhas
   const [input, setInput] = useState('')
   const [chave, setChave] = useState('')
   const [resultado, setResultado] = useState('')
-  const [tema, setTema] = useState('light')
+  const [config, setConfig] = useState({tema: 'claro', palavras: Configs.configPt})
+  const [idioma, setIdioma] = useState(false)
+  const [tema, setTema] = useState(false)
+  const [alertBox, setAlertBox] = useState('none')
+  
+  useEffect(() => {
+    const localTema = localStorage.getItem('tema')
+    const localIdioma = localStorage.getItem('idioma')
+    const obj = {tema: 'claro', palavras: Configs.configPt}
+
+    if (localTema === 'escuro') {
+      obj.tema = 'escuro'
+      obj.palavras.temaColor = obj.palavras.temaColor.reverse()
+      document.documentElement.style.cssText = Configs.configEscuro
+      setTema(true)
+    }
+
+    if (localIdioma === 'en') {
+      obj.palavras = Configs.configEn
+      setIdioma(true)
+
+      if (localTema === 'escuro') {
+        obj.palavras.temaColor = obj.palavras.temaColor.reverse()
+      }
+    }
+
+    setConfig(obj)
+  }, [])
 
   function handleLines(event) {
     const textarea = event.target.scrollHeight
@@ -19,47 +55,25 @@ function App() {
     setChave(event.target.value)
   }
 
-  function criptografar(){
-    // const err = debug()
-    // if (err === true) {return}
-    const str = input
-    const key = chave
-    const chaveCompleta = gerarChaveCompleta(str, key)
-    let textoCriptografado = ''
-
-    for (let i = 0; i < str.length; i++) { 
-      const codStr = str[i].codePointAt(0) - 32
-      const codKey = chaveCompleta[i].codePointAt(0) - 32
-  
-      const codResultado = (codStr + codKey) % 224
-  
-      const strResultado = String.fromCharCode(codResultado + 32)
-
-      textoCriptografado += strResultado
+  function criptografarButton(){
+    const err = debug()
+    if (err === true) {
+      setAlertBox('flex')
+      return
     }
 
+    const textoCriptografado = criptografar(input, chave)
     setResultado(textoCriptografado)
   }
 
-  function desencriptografar(){
-    // const err = debug()
-    // if (err === true) {return}
-    const str = input
-    const key = chave
-    const chaveCompleta = gerarChaveCompleta(str, key)
-    let textoDesencriptografado = ''
-
-    for (let i = 0; i < str.length; i++) {
-      const codStr = str[i].codePointAt(0) - 32
-      const codKey = chaveCompleta[i].codePointAt(0) - 32
-  
-      const codResultado = (codStr - codKey + 224) % 224
-  
-      const strResultado = String.fromCharCode(codResultado + 32)
-
-      textoDesencriptografado += strResultado
+  function desencriptografarButton(){
+    const err = debug()
+    if (err === true) {
+      setAlertBox('flex')
+      return
     }
-    
+
+    const textoDesencriptografado = desencriptografar(input, chave)  
     setResultado(textoDesencriptografado)
   }
 
@@ -71,51 +85,95 @@ function App() {
     if (!chave){
       err = true
     }
-
     return err
   }
 
-  function gerarChaveCompleta(string, key) {
-    if (string.length <= key.length) {return key} // Se a chave for maior ou igual ao texto, é retornado a chave sem alteração.
-    let chaveCompleta = ''
-    for (let x = 0; chaveCompleta.length < string.length; x++) {
-      if (x === key.length ) { x = 0 }
-      chaveCompleta += key[x]
+  function temaConfig(event) {
+    if (event.target.value === 'true') {
+      localStorage.setItem('tema', 'claro')
+
+      const obj = config
+      obj.tema = 'claro'
+      obj.temaColor = obj.palavras.temaColor.reverse()
+      document.documentElement.style.cssText = Configs.configClaro
+      setConfig(obj)
+      setTema(false)
+    } else {
+      localStorage.setItem('tema', 'escuro')
+
+      const obj = config
+      obj.tema = 'escuro'
+      obj.temaColor = obj.palavras.temaColor.reverse()
+      document.documentElement.style.cssText = Configs.configEscuro
+      setConfig(obj)
+      setTema(true)
     }
-    return chaveCompleta // Uma nova chave é gerada, para que fique do tamanho do texto. Para isso ela é repetida várias vezes.
   }
 
-  function teste(event) {
-    if (tema === 'light') {
-      setTema('dark')
-      document.documentElement.style.cssText = 
-      '--background-color: #1F232D; --text-color: #FFFFFF; --background-color-output: #15171E77'
-    }
+  function idiomaConfig(event) {
+    if (event.target.value === 'true') {
+      localStorage.setItem('idioma', 'pt')
 
-    if (tema === 'dark') {
-      setTema('light')
-      document.documentElement.style.cssText = 
-      '--background-color: #FFFFFF; --text-color: #2A2C2D; --background-color-output: #F1F1F1'
+      const obj = config
+      obj.palavras = Configs.configPt
+
+      if (tema === true) {
+        obj.palavras.temaColor = ['Escuro', 'Claro']
+      }
+
+      if (tema === false) {
+        obj.palavras.temaColor = ['Claro', 'Escuro']
+      }
+
+      setConfig(obj)
+      setIdioma(false)
+    } else {
+      localStorage.setItem('idioma', 'en')
+
+      const obj = config
+      obj.palavras = Configs.configEn
+
+      if (tema === true) {
+        obj.palavras.temaColor = ['Dark', 'Light']
+      }
+
+      if (tema === false) {
+        obj.palavras.temaColor = ['Light', 'Dark']
+      }
+
+      setConfig(obj)
+      setIdioma(true)
     }
   }
 
   return (
     <div className="container">
       <header>
-        <img src={tema === 'light' ? light : dark} alt="logo" id="logo"/>
+        <img src={config.tema === 'claro' ? light : dark} alt="logo" id="logo"/>
+
+        <Alert 
+          severity="error" 
+          onClose={() => setAlertBox('none')}
+          style={{display: alertBox}}
+          >{config.palavras.alert}</Alert>
 
         <div className="tema">
-          <h2>Tema - {tema === 'light' ? 'Claro' : 'Escuro'}</h2>
-          <div className="switch-container">
-            <input id="switch-shadow" className="switch switch--shadow" type="checkbox" onClick={teste}/>
-            <label htmlFor="switch-shadow"></label>
-          </div>
+          <FormGroup>
+            <FormControlLabel
+              control={<Switch color="primary" checked={tema} value={tema} onChange={temaConfig} />}
+              label={`${config.palavras.tema} - ${config.palavras.temaColor[0]}`}
+            />
+            <FormControlLabel
+              control={<Switch color="primary" checked={idioma} value={idioma} onChange={idiomaConfig} />}
+              label={config.palavras.idioma}
+            />
+          </FormGroup>
         </div>
       </header>
 
       <main>
         <div className="dados">
-          <h1>Entrada</h1>
+          <h1>{config.palavras.entrada}</h1>
           <textarea 
             type="text" 
             value={input} 
@@ -127,7 +185,7 @@ function App() {
 
         <div className="key">
           <div className="chave">
-            <h1>Chave</h1>
+            <h1>{config.palavras.chave}</h1>
             <textarea 
               type="text" 
               maxLength="112" 
@@ -138,20 +196,20 @@ function App() {
             />
           </div>
           <div className="botoes">
-            <button onClick={criptografar}>
+            <button onClick={criptografarButton}>
                 <img src={fechado} alt="Cadeado Aberto" className="icon"/>
-                <span>Encriptar</span>
+                <span>{config.palavras.encriptar}</span>
             </button>
 
-            <button onClick={desencriptografar}>
+            <button onClick={desencriptografarButton}>
                 <img src={aberto} alt="Cadeado Aberto" className="icon"/>
-                <span>Desencriptar</span>
+                <span>{config.palavras.desencriptar}</span>
             </button>
           </div>
         </div>
 
         <div className="dados">
-          <h1>Saída</h1>
+          <h1>{config.palavras.saida}</h1>
           <textarea id="output" type="text" disabled value={resultado} />
         </div>
         
